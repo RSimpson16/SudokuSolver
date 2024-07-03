@@ -1,82 +1,80 @@
-def is_valid(board, row, col, num):
-    # Check if the number is already in the current row
-    if num in board[row]:
-        return False
+board = [
+    [7, 8, 0, 4, 0, 0, 1, 2, 0],
+    [6, 0, 0, 0, 7, 5, 0, 0, 9],
+    [0, 0, 0, 6, 0, 1, 0, 7, 8],
+    [0, 0, 7, 0, 4, 0, 2, 6, 0],
+    [0, 0, 1, 0, 5, 0, 9, 3, 0],
+    [9, 0, 4, 0, 6, 0, 0, 0, 5],
+    [0, 7, 0, 3, 0, 0, 0, 1, 2],
+    [1, 2, 0, 0, 0, 7, 4, 0, 0],
+    [0, 4, 9, 2, 0, 6, 0, 0, 7]
+]
 
-    # Check if the number is already in the current column
-    for i in range(9):
-        if board[i][col] == num:
+def solve(bo):
+    find = find_empty(bo)
+    if not find:
+        return True
+    else:
+        row, col = find
+
+    for i in range(1,10):
+        if valid(bo, i, (row,col)):
+            bo[row][col] = i
+
+            if solve(bo):
+                return True
+
+            bo[row][col] = 0
+
+    return False
+
+def valid(bo, num, pos):
+
+    #Check row
+    for i in range(len(bo[0])):
+        if bo[pos[0]][i] == num and pos[1] != i:
             return False
 
-    # Check if the number is already in the current 3x3 sub-grid
-    start_row = (row // 3) * 3
-    start_col = (col // 3) * 3
-    for i in range(start_row, start_row + 3):
-        for j in range(start_col, start_col + 3):
-            if board[i][j] == num:
-                return False
+    #Check column
+    for i in range(len(bo)):
+        if bo[i][pos[1]] == num and pos[0] != i:
+            return False
 
+    #Check box
+
+    box_x = pos[1] // 3
+    box_y = pos[0] // 3
+
+    for i in range(box_y*3, box_y*3 + 3):
+        for j in range(box_x*3, box_x*3 + 3):
+            if bo[i][j] == num and (i,j) != pos:
+                return False
     return True
 
 
-def solve_sudoku(board):
-    # Find an empty cell
-    empty_cell = find_empty_cell(board)
+def print_board(bo):
+    for i in range(len(bo)):
+        if i % 3 == 0 and i != 0:
+            print("- - - - - - - - - ")
 
-    # If no empty cells are found, the Sudoku is solved
-    if not empty_cell:
-        return True
+        for j in range(len(bo[0])):
+            if j % 3 == 0 and j != 0:
+                print(" | ", end="")
 
-    row, col = empty_cell
+            if j ==8:
+                print(bo[i][j])
+            else:
+                print(str(bo[i][j]) + " ", end="")
 
-    # Try each number from 1 to 9
-    for num in range(1, 10):
-        if is_valid(board, row, col, num):
-            board[row][col] = num
-
-            # Recursively attempt to solve the rest of the board
-            if solve_sudoku(board):
-                return True
-
-            # If no solution was found, backtrack
-            board[row][col] = 0
-
-    # If no number from 1 to 9 works in this cell, return False to backtrack
-    return False
-
-
-def find_empty_cell(board):
-    # Find the first empty cell (represented by 0)
-    for i in range(9):
-        for j in range(9):
-            if board[i][j] == 0:
+def find_empty(bo):
+    for i in range(len(bo)):
+        for j in range(len(bo[0])):
+            if bo[i][j] == 0:
                 return (i, j)
+
     return None
 
-
-def print_board(board):
-    for row in board:
-        print(row)
-
-
-# Example Sudoku board (0 represents empty cells)
-board = [
-    [0, 6, 8, 0, 2, 4, 9, 0, 0],
-    [3, 4, 0, 5, 1, 0, 0, 8, 7],
-    [1, 0, 7, 3, 8, 0, 0, 5, 0],
-    [0, 8, 5, 0, 3, 1, 4, 7, 0],
-    [2, 1, 9, 0, 0, 7, 0, 0, 0],
-    [0, 0, 4, 0, 0, 0, 0, 0, 2],
-    [4, 7, 3, 6, 0, 0, 0, 9, 1],
-    [0, 0, 0, 0, 0, 0, 0, 4, 0],
-    [8, 0, 0, 0, 0, 3, 0, 0, 6]
-]
-
-print("Original Sudoku:")
 print_board(board)
-
-if solve_sudoku(board):
-    print("\nSolved Sudoku:")
-    print_board(board)
-else:
-    print("\nNo solution exists.")
+solve(board)
+print("__________________")
+print_board(board)
